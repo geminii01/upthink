@@ -11,7 +11,6 @@ import re
 
 load_dotenv()
 
-
 class Related_Note:
     """
     Obsidian vault 안의 md 파일들을 임베딩하고,
@@ -134,7 +133,7 @@ class Related_Note:
 
         for md_file in self.vault_path.rglob("*.md"):
             rel = md_file.relative_to(self.vault_path).as_posix()
-            if "upthink" in rel.split("/"):
+            if ".venv" in rel.split("/"):
                 continue
             if rel not in embedded:
                 to_embed.append(rel)
@@ -263,7 +262,6 @@ class Related_Note:
 
         # 첫 번째 청크 기준으로 유사도 검색
         hits = self.vector_store.similarity_search(query_chunks[0], k=k + 4)
-
         related: list[str] = []
         for d in hits:
             raw_path = d.metadata.get("path", "")
@@ -283,10 +281,9 @@ class Related_Note:
 
             if len(related) >= k:
                 break
-
         return related
 
-    def append_related_links(self, MY_VAULT_PATH: str, k: int = 3) -> None:
+    def append_related_links(self, MY_VAULT_PATH: str, k: int = 3):
         """
         주어진 노트 파일의 끝에 "Related Notes" 섹션을 추가하고
         [[연관노트]] 링크를 최대 k개까지 삽입합니다.
@@ -299,6 +296,7 @@ class Related_Note:
         Returns:
             None
         """
+        print(MY_VAULT_PATH)
         related = self.find_related_notes(MY_VAULT_PATH, k=k)
         if not related:
             return
@@ -307,10 +305,13 @@ class Related_Note:
         target_path = self.vault_path / norm_query
 
         with target_path.open("a", encoding="utf-8") as f:
+            list_ = []
             f.write("\n\n## 🔗 Related Notes\n")
             for path_rel in related[:k]:
                 # Obsidian 링크에서는 확장자(.md)를 떼기 위해 [:-3]
                 f.write(f"[[{path_rel[:-3]}]]\n")
+                list_.append(path_rel[:-3])
+            return list_
 
 
 
