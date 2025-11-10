@@ -191,7 +191,8 @@ class TagComparator:
         # 비교 및 매칭
         return self.compare_tags(new_tags, existing_tags)
 
-    def get_final_tags(self, matches: List[TagMatch]) -> List[str]:
+    @staticmethod
+    def get_final_tags(matches: List[TagMatch]) -> List[str]:
         """
         매칭 결과를 기반으로 최종 추천 태그 리스트 생성
 
@@ -299,7 +300,7 @@ if __name__ == "__main__":
             )
 
         # 4. 최종 추천 태그
-        final_tags = comparator.get_final_tags(matches)
+        final_tags = TagComparator.get_final_tags(matches)
         print(f"\n[최종 추천 태그]")
         print("-" * 60)
         print(final_tags)
