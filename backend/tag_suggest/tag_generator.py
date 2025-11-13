@@ -22,6 +22,7 @@ class TagGenerator:
         temperature: float = 0.3,
         max_tokens: int = 1000,
         reasoning_effort: str = "high",
+        timeout: int = 300,
     ):
         """
         TagGenerator 초기화
@@ -31,6 +32,7 @@ class TagGenerator:
             temperature: 생성 다양성 (0.0-1.0, 기본값: 0.3)
             max_tokens: 최대 토큰 수 (기본값: 1000)
             reasoning_effort: reasoning 강도 (기본값: "high")
+            timeout: API 타임아웃 (초 단위, 기본값: 300 = 5분)
         """
         api_key = os.getenv("UPSTAGE_API_KEY")
         if not api_key:
@@ -39,6 +41,7 @@ class TagGenerator:
         self.client = OpenAI(
             api_key=api_key,
             base_url="https://api.upstage.ai/v1",
+            timeout=timeout,
         )
         self.model = model
         self.temperature = temperature
@@ -124,6 +127,10 @@ class TagGenerator:
         for attempt in range(max_retries):
             try:
                 # LLM API 호출
+                print(f"[DEBUG] 태그 생성 시작 (시도 {attempt + 1}/{max_retries})")
+                print(f"[DEBUG] 모델: {self.model}, reasoning_effort: {self.reasoning_effort}")
+                print(f"[DEBUG] API 호출 중... (최대 {self.client.timeout}초 대기)")
+
                 stream = self.client.chat.completions.create(
                     model=self.model,
                     messages=[
@@ -142,14 +149,19 @@ class TagGenerator:
                     stream=False,
                 )
 
+                print(f"[DEBUG] API 응답 수신 완료")
+
                 # 응답 추출
                 if not stream.choices:
                     raise ValueError("LLM 응답에 choices가 없습니다")
 
                 response = stream.choices[0].message.content
+                print(f"[DEBUG] 응답 파싱 시작")
 
                 # 응답 파싱
-                return self._parse_llm_response(response)
+                tags = self._parse_llm_response(response)
+                print(f"[DEBUG] 태그 생성 완료: {len(tags)}개")
+                return tags
 
             except ValueError as e:
                 last_error = e
