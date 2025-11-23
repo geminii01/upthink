@@ -35,8 +35,6 @@ def render_common_sidebar():
             key="uploaded_file",
         )
 
-        st.divider()
-
 
 # 공통 사이드바 렌더링
 render_common_sidebar()

@@ -429,7 +429,7 @@ def main():
                 st.rerun()
         else:
             st.warning(
-                "👈ㅤ왼쪽 사이드바에서 Vault 경로와 Markdown 파일 설정을 완료해 주세요."
+                "👈ㅤ왼쪽 사이드바에서 ***Vault 경로*** 와 ***Markdown 파일 업로드*** 설정을 완료해 주세요."
             )
 
     # Step 2-3: 기존 태그 미리보기 + 태그 작성 가이드라인 + 태그 비교 결과
