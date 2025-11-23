@@ -246,7 +246,9 @@ def handle_search():
                         wiki_content += f"[Wikipedia 링크]({r['url']})\n\n"
                     wiki_content += "---\n\n"
 
-                FileHandler.save_search_result(save_folder, "wiki_search", wiki_content)
+                print(f"save_folder: {save_folder}")
+                save_result = FileHandler.save_search_result(save_folder, "wiki_search", wiki_content)
+                print(f"wiki_search.md 저장 결과: {save_result}")
 
                 # Update note with search timestamp
                 timestamp = wiki_results[0]['searched_at'] if wiki_results else FileHandler.get_current_timestamp()
