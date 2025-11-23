@@ -231,16 +231,20 @@ def handle_search():
             wiki_client = WikipediaClient(language="ko")
             for keyword in keywords:
                 result = wiki_client.search_and_get_summary(keyword)
-                if result and result.get('wiki_exists', False):
+                if result:
                     wiki_results.append(result)
+                    print(f"Wikipedia 결과: {keyword} -> wiki_exists={result.get('wiki_exists')}")
 
             # Save wiki results
             if wiki_results:
                 wiki_content = "# Wikipedia 검색 결과\n\n"
                 for r in wiki_results:
-                    wiki_content += f"## {r['title']} ({r['keyword']})\n\n"
+                    title = r.get('title') or r.get('keyword', 'Unknown')
+                    wiki_content += f"## {title} ({r['keyword']})\n\n"
                     wiki_content += f"{r['summary']}\n\n"
-                    wiki_content += f"[Wikipedia 링크]({r['url']})\n\n---\n\n"
+                    if r.get('url'):
+                        wiki_content += f"[Wikipedia 링크]({r['url']})\n\n"
+                    wiki_content += "---\n\n"
 
                 FileHandler.save_search_result(save_folder, "wiki_search", wiki_content)
 
