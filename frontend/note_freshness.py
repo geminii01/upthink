@@ -64,8 +64,6 @@ def initialize_app():
     """Initialize the application."""
     Config.ensure_directories()
     StateManager.initialize()
-    # Ensure pandoc is installed
-    ensure_pandoc_installed()
 
 
 def validate_api_key() -> bool:
@@ -410,29 +408,47 @@ def main():
     initialize_app()
 
     # Title
-    st.title("🔄 노트 최신성 검토")
-    st.markdown("노트의 정보가 최신인지 확인하고 업데이트 가이드라인을 생성합니다.")
+    st.title("🔄 최신성 검토")
+    st.caption(
+        "노트의 정보가 최신인지 확인하고, 최신성 검토 가이드를 노트에 추가합니다!"
+    )
 
     # Check API key
     if not validate_api_key():
         return
 
-    # Sidebar
-    with st.sidebar:
-        st.markdown("## Navigation")
-        current_step = StateManager.get_current_step()
-        st.markdown(f"**현재 단계:** {current_step}")
+    # Check pandoc installation
+    try:
+        pypandoc.get_pandoc_path()
+        pandoc_available = True
+    except (OSError, RuntimeError):
+        pandoc_available = False
 
-        if st.button("🔄 초기화"):
-            StateManager.reset()
-            st.rerun()
+    if not pandoc_available:
+        st.warning("⚠️ Pandoc이 설치되지 않았습니다. 최신성 검토를 위해 필요합니다.")
 
-        st.markdown("---")
-        st.markdown("### About")
-        st.markdown(
-            "이 애플리케이션은 노트의 최신성을 검토하고 "
-            "업데이트가 필요한 부분에 대한 가이드라인을 생성합니다."
-        )
+        st.markdown("### 설치 방법")
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.markdown("##### macOS")
+            st.markdown("**방법 1:** Homebrew 사용 (추천)")
+            st.code("brew install pandoc")
+            st.markdown(
+                "**방법 2:** [공식 인스톨러 다운로드](https://github.com/jgm/pandoc/releases/latest)"
+            )
+
+        with col2:
+            st.markdown("##### Windows")
+            st.markdown("**방법 1:** winget 사용 (추천)")
+            st.code("winget install --source winget --exact --id JohnMacFarlane.Pandoc")
+            st.markdown(
+                "**방법 2:** [공식 인스톨러 다운로드](https://github.com/jgm/pandoc/releases/latest)"
+            )
+
+        st.info("💡 설치 후 새로고침을 해주세요.")
+        st.stop()
 
     # Main content based on current step
     current_step = StateManager.get_current_step()
@@ -516,6 +532,11 @@ def main():
         st.markdown("- `wiki_search.md`: Wikipedia 검색 결과")
         st.markdown("- `tavily_search.md`: Tavily 검색 결과")
         st.markdown("- `rcnt-guide-full.md`: 전체 최신성 검토 가이드")
+
+        st.markdown("---")
+        if st.button("🔄 초기화", type="primary"):
+            StateManager.reset()
+            st.rerun()
 
 
 if __name__ == "__main__":
