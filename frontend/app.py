@@ -69,6 +69,11 @@ note_split = st.Page(
     title="노트 분할",
     icon=":material/split_scene:",
 )
+note_freshness = st.Page(
+    "note_freshness.py",
+    title="최신성 검토",
+    icon=":material/update:",
+)
 
 pg = st.navigation(
     {
@@ -78,6 +83,7 @@ pg = st.navigation(
             tag_suggest,
             related_note,
             note_split,
+            note_freshness,
         ],
     }
 )
