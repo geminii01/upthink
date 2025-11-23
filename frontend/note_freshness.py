@@ -52,10 +52,35 @@ DEFAULT_EXTRACTION_SCHEMA = """{
 }"""
 
 
+def ensure_pandoc_installed() -> bool:
+    """Ensure pandoc is installed, download if necessary.
+    
+    Returns:
+        bool: True if pandoc is available, False otherwise.
+    """
+    try:
+        # Try to get pandoc path to check if it's installed
+        pypandoc.get_pandoc_path()
+        return True
+    except (OSError, RuntimeError):
+        # Pandoc is not installed, download it
+        try:
+            with st.spinner("Pandoc을 다운로드하는 중..."):
+                pypandoc.download_pandoc()
+            st.success("✅ Pandoc이 성공적으로 설치되었습니다.")
+            return True
+        except Exception as e:
+            st.error(f"⚠️ Pandoc 다운로드에 실패했습니다: {str(e)}")
+            st.info("수동으로 Pandoc을 설치해주세요: https://pandoc.org/installing.html")
+            return False
+
+
 def initialize_app():
     """Initialize the application."""
     Config.ensure_directories()
     StateManager.initialize()
+    # Ensure pandoc is installed
+    ensure_pandoc_installed()
 
 
 def validate_api_key() -> bool:
@@ -115,6 +140,11 @@ def handle_extraction(schema_content: str):
     note_path = StateManager.get_raw_note_path()
     if not note_path:
         render_error("노트 경로를 찾을 수 없습니다.")
+        return
+
+    # Ensure pandoc is installed before using it
+    if not ensure_pandoc_installed():
+        render_error("Pandoc이 필요합니다. 설치 후 다시 시도해주세요.")
         return
 
     with st.spinner("노트에서 키워드와 쿼리를 추출 중..."):
