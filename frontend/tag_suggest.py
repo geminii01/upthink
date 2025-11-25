@@ -111,8 +111,8 @@ def render_checklist_form():
                 "언어",
                 options=["en", "ko"],
                 format_func=lambda x: {
-                    "en": "영어만",
-                    "ko": "한국어만",
+                    "en": "영어",
+                    "ko": "한국어",
                 }[x],
                 label_visibility="collapsed",
                 key="language_radio",
