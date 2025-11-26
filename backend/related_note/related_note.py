@@ -1,4 +1,3 @@
-
 from dotenv import load_dotenv
 from langchain_chroma import Chroma
 from langchain_upstage import UpstageEmbeddings
@@ -10,6 +9,7 @@ import os
 import re
 
 load_dotenv()
+
 
 class Related_Note:
     """
@@ -47,7 +47,6 @@ class Related_Note:
 
         # 마커 파일 보장
         self._ensure_marker_file()
-
 
     def _init_vector_store(self) -> Chroma:
         """
@@ -100,7 +99,6 @@ class Related_Note:
 
         lines = self.marker_root.read_text(encoding="utf-8").splitlines()
         return {line.strip() for line in lines if line.strip()}
-    
 
     def save_embedded_notes(self, new_notes: list[str]) -> None:
         """
@@ -159,7 +157,7 @@ class Related_Note:
             n_chunks = math.ceil(total_tokens / 4000)
             chunk_size = math.ceil(total_tokens / n_chunks)
             for i in range(0, total_tokens, chunk_size):
-                chunk_tokens = token_list[i: i + chunk_size]
+                chunk_tokens = token_list[i : i + chunk_size]
                 chunk_text = self.enc.decode(chunk_tokens)
                 chunks.append(chunk_text)
         else:
@@ -170,6 +168,7 @@ class Related_Note:
     def clean_text(self, text: str) -> str:
         """
         md 파일 내용을 간단히 전처리합니다.
+        - Windows/Unix 줄바꿈 정규화 (Windows 호환성)
         - 특수 공백 문자 제거 (non-breaking space 등)
         - 굵게(**) 마크다운 제거
         - 연속 개행을 하나로 축소
@@ -180,12 +179,13 @@ class Related_Note:
         Returns:
             str: 전처리된 텍스트.
         """
-        x = re.sub(r"[\xa0\u200b]", "", text)
+        # Windows 줄바꿈(\r\n)을 Unix 스타일(\n)로 정규화
+        x = text.replace("\r\n", "\n").replace("\r", "\n")
+        x = re.sub(r"[\xa0\u200b]", "", x)
         x = re.sub(r"\*\*", "", x)
         x = re.sub(r"\n+", "\n", x)
         x = x.strip()
         return x
-
 
     # ──────────────────────────────────────────────────────────
     # 임베딩 실행
@@ -212,30 +212,43 @@ class Related_Note:
             note_path = self.vault_path / note_rel
             raw_text = note_path.read_text(encoding="utf-8")
             cleaned = self.clean_text(raw_text)
+
+            # 빈 텍스트는 임베딩 건너뛰기 (Windows 호환성)
+            if not cleaned or not cleaned.strip():
+                # 빈 파일도 마커에 기록하여 다음에 다시 시도하지 않음
+                self.save_embedded_notes([note_rel])
+                continue
+
             chunks = self.chunk_text(cleaned)
 
             if len(chunks) > 1:
                 for i, chunk in enumerate(chunks, start=1):
+                    # 빈 청크는 건너뛰기
+                    if not chunk or not chunk.strip():
+                        continue
                     self.vector_store.add_texts(
                         ids=[str(uuid4())],
-                        metadatas=[{
-                            "title": f"{Path(note_rel).stem}_{i}",
-                            "path": note_rel,
-                        }],
+                        metadatas=[
+                            {
+                                "title": f"{Path(note_rel).stem}_{i}",
+                                "path": note_rel,
+                            }
+                        ],
                         texts=[chunk],
                     )
             else:
                 self.vector_store.add_texts(
                     ids=[str(uuid4())],
-                    metadatas=[{
-                        "title": Path(note_rel).stem,
-                        "path": note_rel,
-                    }],
+                    metadatas=[
+                        {
+                            "title": Path(note_rel).stem,
+                            "path": note_rel,
+                        }
+                    ],
                     texts=[cleaned],
                 )
 
             self.save_embedded_notes([note_rel])
-
 
     # ──────────────────────────────────────────────────────────
     # 연관 노트 찾기 & 링크 삽입
@@ -246,7 +259,7 @@ class Related_Note:
         Args:
             MY_VAULT_PATH (str):
                 vault 기준 상대 경로, 사용자가 input으로 넣을 경로
-                예) "upthink/data/HCI 2025 학회 강의세션들.md"                
+                예) "upthink/data/HCI 2025 학회 강의세션들.md"
             k (int, optional):
                 최대 몇 개의 연관 노트를 반환할지. 기본값 3.
         Returns:
@@ -315,7 +328,6 @@ class Related_Note:
                 f.write(f"[[{path_rel[:-3]}]]\n")
                 list_.append(path_rel[:-3])
             return list_
-
 
 
 # ──────────────────────────────────────────────────────────
