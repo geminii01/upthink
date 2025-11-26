@@ -1,5 +1,5 @@
 """
-왼쪽 사이드바 하단에 "노트 업로드", "Vault 경로 입력" 추가해야 함
+UpThink 메인 앱
 """
 
 import os
@@ -11,28 +11,51 @@ load_dotenv()
 
 st.set_page_config(page_title="UpThink", page_icon="💭", layout="wide")
 
-st.title("💭 UpThink")
-st.caption("지식을 정리하는 사고에만 집중할 수 있음")
-
 # API Key 설정
 UPSTAGE_API_KEY = os.getenv("UPSTAGE_API_KEY")
 
 
-image_ocr = st.Page(
-    "image_ocr.py",
-    title="이미지 처리",
-    icon=":material/upload_file:",
+# 공통 사이드바 설정
+def render_common_sidebar():
+    """모든 페이지에서 공통으로 사용하는 사이드바"""
+    with st.sidebar:
+        # Vault 경로 입력
+        st.text_input(
+            "Vault 경로",
+            placeholder="Obsidian Vault의 경로를 입력하세요",
+            help="Obsidian Vault 디렉토리의 절대 경로를 입력하세요",
+            key="vault_path",
+        )
+
+        # 파일 업로드
+        st.file_uploader(
+            "Markdown 파일 업로드",
+            type=["md"],
+            help="처리할 마크다운 파일을 업로드하세요",
+            key="uploaded_file",
+        )
+
+
+# 공통 사이드바 렌더링
+render_common_sidebar()
+
+
+home = st.Page(
+    "home.py",
+    title="Intro",
+    icon=":material/home:",
     default=True,
 )
-note_summary = st.Page(
-    "note_summary.py",
-    title="노트 요약",
-    icon=":material/summarize:",
+
+image_ocr = st.Page(
+    "image_ocr.py",
+    title="이미지 대체 텍스트 생성",
+    icon=":material/image_search:",
 )
 tag_suggest = st.Page(
     "tag_suggest.py",
     title="태그 추천",
-    icon=":material/tag:",
+    icon=":material/new_label:",
 )
 related_note = st.Page(
     "related_note.py",
@@ -44,16 +67,22 @@ note_split = st.Page(
     title="노트 분할",
     icon=":material/split_scene:",
 )
+note_freshness = st.Page(
+    "note_freshness.py",
+    title="최신 정보 확인",
+    icon=":material/update:",
+)
 
 pg = st.navigation(
     {
+        "홈": [home],
         "노트 정리": [
             image_ocr,
-            note_summary,
             tag_suggest,
             related_note,
             note_split,
         ],
+        "최신성 검증": [note_freshness],
     }
 )
 pg.run()

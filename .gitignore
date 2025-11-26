@@ -1,9 +1,10 @@
 # Created by https://www.toptal.com/developers/gitignore/api/python,jupyternotebooks,vim,macos,windows,venv,linux,dotenv,git,visualstudiocode
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,jupyternotebooks,vim,macos,windows,venv,linux,dotenv,git,visualstudiocode
 
-### (+) User data
 notebooks/
 archive/
+backend/related_note/vector_store/
+backend/related_note/embedded_markers.txt
 
 ### dotenv ###
 .env

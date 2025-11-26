@@ -149,7 +149,7 @@ class TagExtractor:
 if __name__ == "__main__":
     tag_extractor = TagExtractor()
 
-    MY_VAULT_PATH = "/Users/jjaem/Documents/obsidian/PARA"
+    MY_VAULT_PATH = "YOUR_PATH_HERE"  # 절대 경로로 입력
 
     print(f"'{MY_VAULT_PATH}' 경로에서 태그 추출 시작")
     print("-" * 40)
