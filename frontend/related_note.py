@@ -12,6 +12,12 @@ sys.path.insert(0, str(project_root))
 from backend.related_note import Related_Note
 
 
+@st.cache_resource
+def get_engine(vault_path: str):
+    """엔진 인스턴스를 캐싱하여 재사용 (Chroma DB 연결 충돌 방지)"""
+    return Related_Note(vault_path=vault_path)
+
+
 def init_session_state():
     """세션 상태 초기화"""
     if "show_input" not in st.session_state:
@@ -123,9 +129,9 @@ def main():
         st.error(f"❌ 유효하지 않은 경로입니다: {vault_path}")
         st.stop()
 
-    # 엔진 초기화
+    # 엔진 초기화 (캐싱됨)
     try:
-        engine = Related_Note(vault_path=vault_path)
+        engine = get_engine(vault_path=vault_path)
         st.success(
             f"""✅ Vault 연결 완료: {vault_path}
 
