@@ -272,5 +272,5 @@ upthink/
 
 ## Acknowledgements
 
-This project was conducted as part of the **Upstage AI Ambassador** program.
+This project was conducted as part of the **Upstage AI Ambassador** program. \
 We thank **[Upstage](https://www.upstage.ai/)** for providing credits to support this project.
