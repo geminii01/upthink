@@ -1,104 +1,276 @@
 # UpThink
 
-**[Upstage AI Ambassador]** 개인 지식 관리 with Upstage Solar pro 2
+**[Upstage AI Ambassador]** Personal Knowledge Management with Upstage Solar Pro 2 ✨
 
 ## Overview
 
-> 🎬 시연 영상 보러가기: [YouTube](https://www.youtube.com/watch?v=8bjLew7KTW4)
+UpThink is a service designed to minimize the repetitive manual effort in Personal Knowledge Management environments (specifically Obsidian).
+It addresses the following bottlenecks that inevitably arise during the knowledge organization process.
 
-UpThink는 개인 지식 관리 환경(Obsidian)에서 발생하는 반복적인 수작업 비용을 최소화하는 서비스입니다.
+| Problem | Description |
+|------|------|
+| **Image Data Processing** | Manual conversion of visual information into text |
+| **Tag Management** | Maintaining tag conventions and styling concerns |
+| **Lack of Knowledge Connectivity** | Search costs for finding relevant past notes |
+| **Unstructured Documents** | Need for splitting massive notes |
 
-지식을 정리하는 과정에서 필연적으로 발생하는 다음의 병목 현상들을 해결합니다.
+UpThink automates these processes based on the powerful language understanding capabilities of **Upstage Solar Pro 2**.
+Users can break free from simple repetitive tasks and focus on what matters most—thinking.
 
-▪︎ㅤ이미지 데이터 처리: 시각 정보를 텍스트로 변환하는 수동 작업 \
-▪︎ㅤ태그 관리: 태그 컨벤션 유지 및 스타일링 고민 \
-▪︎ㅤ지식 연결성 부재: 연관된 과거 노트를 찾기 위한 탐색 비용 \
-▪︎ㅤ비구조화된 문서: 방대한 노트 분할의 필요성
+### Table of Contents
 
-UpThink는 Upstage Solar Pro 2의 강력한 언어 이해 능력을 기반으로 이러한 과정을 자동화합니다. \
-사용자는 단순 반복 작업에서 벗어나, 가장 중요한 사고 활동에만 몰입할 수 있습니다.
+- [Overview](#overview)
+- [Key Features](#key-features)
+- [Tech Stack](#tech-stack)
+- [Architecture](#architecture)
+  - [Flow Chart](#flow-chart)
+- [Installation](#installation)
+- [Usage](#usage)
+  - [Watch Demo Video](#-watch-demo-video-youtube-)
+- [Project Structure](#project-structure)
+- [Members & Roles](#members--roles)
+- [Acknowledgements](#acknowledgements)
+
+## Key Features
+
+### 1️⃣ Image Alt Text Generation
+
+Extracts text from images within notes and automatically generates alt text describing the image content.
+
+- Perform OCR and extract document structure from images using **Upstage Document Parse**
+- Generate alt text of around 50 words based on extracted text using **Solar Pro 2**
+- Batch process all images within markdown files
+- Automatically insert alt text below image links in `![[image.png]]` format
+
+### 2️⃣ Tag Recommendation
+
+Analyzes note content to recommend appropriate tags and maintains consistency with existing Vault tag conventions.
+
+- Automatically collect existing tags in Vault (supports hashtags `#tag` and YAML frontmatter)
+- Set user-defined tag guidelines (language, case, separators, number of tags)
+- Generate tags based on note content using **Solar Pro 2**
+- Compare and match similarity with existing tags using **Qwen Embedding** model
+- Automatically insert tags in YAML frontmatter format
+
+### 3️⃣ Related Note Recommendation
+
+Finds notes semantically similar to the current note and automatically connects them.
+
+- Vectorize notes in Vault using **Upstage Embedding Model** and **Chroma DB**
+- Automatically identify and batch process unembedded notes
+- Process long notes through chunking
+- Recommend Top 3 related notes via similarity search
+- Automatically append backlinks to the `## Related Notes` section using the `[[note]]` format
+
+### 4️⃣ Note Splitting
+
+Splits massive notes by topic to atomize them and build an interconnected knowledge system.
+
+- Automatically extract topics within notes using **Solar Pro 2**
+- Support flexible splitting strategies based on templates
+- Edit, delete, or add extracted topics
+- Automatically generate and save split atomic notes
+- Automatically insert backlinks and `## Generated Atomic Notes` section in original note
+
+## Tech Stack
+
+| Category | Technology |
+|------|------|
+| **Language** | Python 3.13 |
+| **Frontend** | Streamlit |
+| **LLM** | Upstage Solar Pro 2 |
+| **Document AI** | Upstage Document Parse |
+| **Embedding** | Upstage Embedding, Qwen3-Embedding-0.6B |
+| **Vector DB** | Chroma DB |
+| **Framework** | LangChain |
+| **Package Manager** | uv |
 
 ## Architecture
 
-<img width="1395" alt="Image" src="https://github.com/user-attachments/assets/75be6352-930d-4bfb-ae4c-6d9fe15e7d05" />
+<img width="500" alt="Image" src="https://github.com/user-attachments/assets/ada44519-ae1c-4490-a4ae-22c2520b237b" />
+<br>
+<br>
 
-## Features
+| Layer | Component | Description |
+|--------|-----------|------|
+| **Frontend** | Streamlit | Web-based User Interface |
+| **Backend** | Python Modules | Implementation of 4 core features |
+| **Upstage API** | Solar Pro 2, Document Parse, Embedding Model | LLM, OCR, Vector Embedding |
+| **Local** | Qwen Embedding, Chroma DB | Tag similarity comparison, Note vector storage |
 
-### 1️⃣ 이미지 대체 텍스트 생성
+### Flow Chart
 
-노트 내 이미지를 탐색하여 Upstage Document Parse로 텍스트를 추출한 후, Solar Pro 2를 사용하여 이미지를 설명하는 대체 텍스트를 생성합니다. \
-생성된 대체 텍스트는 이미지 링크의 바로 아래에 추가되어, 사용자가 수정된 Markdown 파일을 다운로드할 수 있습니다.
+#### Image Alt Text Generation
 
-### 2️⃣ 태그 추천
+<img width="600" alt="Image" src="https://github.com/user-attachments/assets/9d7a9c48-0e53-45f3-88d9-1cb0c6ea3981" />
+<br>
+<br>
 
-Obsidian Vault 경로에 있는 모든 Markdown 파일에서 2가지 태그 패턴을 추출합니다. 사용자가 업로드한 파일 내용과 직접 설정한 가이드라인(언어, 포맷 등)을 기반으로 태그를 생성하고, 기존 태그와의 유사도를 비교해 최종 태그를 선별합니다. \
-최종 선정된 태그 목록은 YAML Frontmatter 형식으로 노트 최상단에 자동으로 추가되어, 사용자가 수정된 Markdown 파일을 다운로드할 수 있습니다.
+| Step | Flow | Key Backend Modules |
+|:----:|------|-------------------|
+| 1 | Extract image links and check alt text existence | `MarkdownImageProcessor._collect_images_to_process()` |
+| 1 | Search image file paths in Vault | `MarkdownImageProcessor._find_image_in_vault()` |
+| 2 | Extract text from image | `OCRProcessor.extract_text()` |
+| 2 | Generate alt text | `AltTextGenerator.generate_alt_text()` |
+| 3 | Insert alt text below image link | `MarkdownImageProcessor.process_images()` |
 
-### 3️⃣ 연관 노트 추천
+#### Tag Recommendation
 
-Upstage Embedding을 활용하여 노트 chunk를 임베딩하고, ChromaDB를 벡터 저장소로 사용하여 의미 기반 검색을 구현하였습니다. 증분 업데이트 구조를 구축해 재임베딩 비용을 최소화하였습니다.
+<img width="600" alt="Image" src="https://github.com/user-attachments/assets/4b950ff7-6a1b-4df9-ac76-afc5f1defac9" />
+<br>
+<br>
 
-### 4️⃣ 노트 분할
+| Step | Flow | Key Backend Modules |
+|:----:|------|-------------------|
+| 1 | Collect and check existing tags | `TagExtractor.get_unique_tags()`, `TagExtractor.count_tags()` |
+| 2 | Set tag guidelines and generate new tags | `GuidelineGenerator()`, `TagGenerator.generate_tags()` |
+| 3 | Compare existing and new tags | `TagComparator.compare_tags()` |
+| 3 | Suggest final tags | `TagComparator.get_final_tags()` |
+| 4 | Insert YAML Frontmatter | `add_yaml_frontmatter()` |
 
-노트에 혼재된 여러 맥락에서 Solar Pro 2를 통해 주제(topic)와 coverage, 해당 주제 노트에 포함할 keywords, 참조할 본문의 line_numbers를 추출 및 제안하고, 사용자가 주제를 확인해 편집, 삭제, 추가, 선별하여 선별된 주제들에 대한 노트 초안과 가이드라인을 생성, markdown 파일을 지정된 경로에 저장합니다.
+#### Related Note Recommendation
 
-## Upstage Product Usage
+<img width="600" alt="Image" src="https://github.com/user-attachments/assets/1ee795f1-9bcc-4916-9bbc-190dff0ee82e" />
+<br>
+<br>
 
-- [Upstage Solar Pro 2](https://console.upstage.ai/docs/capabilities/generate/reasoning)
-- [Upstage Document Parse](https://console.upstage.ai/docs/capabilities/digitize/document-parsing)
-- [Upstage Information Extract](https://console.upstage.ai/docs/capabilities/extract/universal-extraction)
-- [Upstage Embedding](https://console.upstage.ai/docs/capabilities/embed)
+| Step | Flow | Key Backend Modules |
+|:----:|------|-------------------|
+| 1 | Identify unembedded notes | `Related_Note.get_unembedded_notes()` |
+| 2 | Preprocessing and chunking | `Related_Note.clean_text()`, `Related_Note.chunk_text()` |
+| 2 | Embed notes and save to DB | `Related_Note.index_unembedded_notes()` |
+| 3 | Search related notes | `Related_Note.find_related_notes()` |
+| 4 | Insert backlinks | `Related_Note.append_related_links()` |
+
+#### Note Splitting
+
+<img width="600" alt="Image" src="https://github.com/user-attachments/assets/f834e4a6-7227-4dcd-81e3-5087cf5f218c" />
+<br>
+<br>
+
+| Step | Flow | Key Backend Modules |
+|:----:|------|-------------------|
+| 1 | Load prompt template | `PromptLoader.load_template()` |
+| 1 | Extract Topic | `UpstageClient.generate_with_template_sync()` |
+| 2 | Parse Topic list | `ResponseParser.parse_topics_from_json()` |
+| 3 | Generate atomic notes | `FileHandler.create_atomic_note()` |
+| 3 | Insert backlinks | `FileHandler.insert_backlinks()` |
 
 ## Installation
 
-**지원 환경**
+### Supported Environments
 - macOS
 - Windows (PowerShell, CMD)
 
-### 1. uv 설치
+### Install uv
 
 - https://docs.astral.sh/uv/getting-started/installation/
 
 #### Homebrew
+
 ```
 brew install uv
 ```
 
 #### Windows
+
 ```
 powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 ```
 
-### 2. 프로젝트 설정
+### Project Setup
+
 ```
 # git clone
 git clone https://github.com/geminii01/product-usecase-knowledge-management-upthink.git
 cd product-usecase-knowledge-management-upthink
 ```
 ```
-# 환경 변수 설정 (필수!)
+# Environment Variable Setup (Required!)
 cp .env.example .env
 
-# .env 파일을 열어서 API 키 입력
+# Open .env file and enter API keys
 # UPSTAGE_API_KEY=your_api_key_here
 # TAVILY_API_KEY=your_api_key_here
 ```
 ```
-# Python 3.13과 의존성 자동 설치
+# Install Python 3.13 and dependencies automatically
 uv sync
 ```
 
-### 3. 실행
+### Run
+
 ```
 streamlit run frontend/app.py
 
-# 아래 Local URL로 접속!
+# Access via Local URL below!
 # http://localhost:8501
+```
+
+## Usage
+
+### 🎬 Watch Demo Video: [YouTube](https://www.youtube.com/watch?v=8bjLew7KTW4) 🎬
+
+### Basic Usage
+
+1. Enter **Vault Path** in the sidebar. (Absolute path to Obsidian Vault)
+2. Upload **Markdown file** to process.
+3. Go to the desired feature page and execute.
+
+## Project Structure
+
+```
+upthink/
+├── frontend/                     # Streamlit Frontend
+│   ├── app.py                    # Main App (Routing, Common Sidebar)
+│   ├── home.py                   # Home Page
+│   ├── image_ocr.py              # Image Alt Text Generation UI
+│   ├── tag_suggest.py            # Tag Recommendation UI
+│   ├── related_note.py           # Related Note Recommendation UI
+│   ├── note_split.py             # Note Splitting UI
+│   └── note_freshness.py         # Freshness Check UI
+│
+├── backend/                      # Backend Logic
+│   ├── image_ocr/                # Image OCR & Alt Text Generation
+│   │   ├── ocr_processor.py      # Document Parse API Integration
+│   │   ├── alt_text_generator.py # Solar Pro 2 Alt Text Generation
+│   │   └── markdown_processor.py # Markdown Image Processing
+│   │
+│   ├── tag_suggest/              # Tag Suggestion
+│   │   ├── tag_extractor.py      # Extract 2 Tag Patterns
+│   │   ├── tag_guidelines.py     # Guideline Generation
+│   │   ├── tag_generator.py      # Solar Pro 2 Tag Generation
+│   │   ├── tag_comparator.py     # Qwen Embedding Similarity Comparison
+│   │   └── markdown_processor.py # YAML frontmatter Processing
+│   │
+│   ├── related_note/             # Related Note Recommendation
+│   │   └── related_note.py       # Chroma DB based Similarity Search
+│   │
+│   ├── note_split/               # Note Splitting
+│   │   ├── config.py             # Config
+│   │   ├── models.py             # Data Models
+│   │   ├── core/                 # State Management, File Handling
+│   │   ├── llm/                  # LLM Client, Prompt Loader
+│   │   └── ui/                   # UI Components
+│   │
+│   └── note_freshness/           # Freshness Verification
+│       ├── api/                  # Tavily, Wikipedia API
+│       ├── core/                 # State Management
+│       └── llm/                  # LLM Integration
+│
+├── prompts/                      # Prompt Templates (YAML)
+├── pyproject.toml                # Project Configuration & Dependencies
+└── .env.example                  # Environment Variable Example
 ```
 
 ## Members & Roles
 
-|김수연|오주영|윤이지|홍재민|
-|:-:|:-:|:-:|:-:|
+| Kim Su-yeon | Oh Ju-yeong | Yoon I-ji | Hong Jae-min |
+|:------:|:------:|:------:|:------:|
 | <a href="https://github.com/rlatndusgu" target="_blank"><img src="https://avatars.githubusercontent.com/u/204878926?v=4" height=130 width=130></img></a><br><a href="https://github.com/rlatndusgu" target="_blank"><img src="https://img.shields.io/badge/GitHub-black.svg?&style=round&logo=github"/> | <a href="https://github.com/Secludor" target="_blank"><img src="https://avatars.githubusercontent.com/u/129930239?v=4" height=130 width=130></img></a><br><a href="https://github.com/Secludor" target="_blank"><img src="https://img.shields.io/badge/GitHub-black.svg?&style=round&logo=github"/> | <a href="https://github.com/Yiji-1015" target="_blank"><img src="https://avatars.githubusercontent.com/u/122429800?v=4" height=130 width=130></img></a><br><a href="https://github.com/Yiji-1015" target="_blank"><img src="https://img.shields.io/badge/GitHub-black.svg?&style=round&logo=github"/> | <a href="https://github.com/geminii01" target="_blank"><img src="https://avatars.githubusercontent.com/u/171089104?v=4" height=130 width=130></img></a><br><a href="https://github.com/geminii01" target="_blank"><img src="https://img.shields.io/badge/GitHub-black.svg?&style=round&logo=github"/> |
-|▪︎ 이미지 대체 텍스트 생성 기능 개발|▪︎ 노트 분할 기능 개발<br>▪︎ 최신성 검증 개발|▪︎ PM<br>▪︎ 연관 노트 추천 기능 개발|▪︎ 태그 추천 기능 개발<br>▪︎ GitHub 관리 & 팀 코드 통합|
+| ▪︎ Developed Image Alt Text Generation Feature | ▪︎ Developed Note Splitting Feature <br> ▪︎ Integrated Freshness Verification | ▪︎ PM <br> ▪︎ Developed Related Note Recommendation Feature | ▪︎ Developed Tag Recommendation Feature <br> ▪︎ GitHub Management & Team Code Integration |
+
+## Acknowledgements
+
+This project was conducted as part of the **Upstage AI Ambassador** program. \
+We thank **[Upstage](https://www.upstage.ai/)** for providing credits to support this project.
